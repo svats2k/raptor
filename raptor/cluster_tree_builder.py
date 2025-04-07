@@ -7,9 +7,17 @@ from typing import Dict, List, Set
 from .cluster_utils import ClusteringAlgorithm, RAPTOR_Clustering
 from .tree_builder import TreeBuilder, TreeBuilderConfig
 from .tree_structures import Node, Tree
-from .utils import (distances_from_embeddings, get_children, get_embeddings,
-                    get_node_list, get_text,
-                    indices_of_nearest_neighbors_from_distances, split_text)
+from .utils import (
+    distances_from_embeddings,
+    get_children,
+    get_embeddings,
+    get_node_list,
+    get_text,
+    indices_of_nearest_neighbors_from_distances,
+    split_text,
+)
+
+from raptor.logger import logger
 
 logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO)
 
@@ -72,6 +80,9 @@ class ClusterTreeBuilder(TreeBuilder):
                 context=node_texts,
                 max_tokens=summarization_length,
             )
+
+            logger.info(f"Source texts: {node_texts}")
+            logger.info(f"Summary: {summarized_text}")
 
             logging.info(
                 f"Node Texts Length: {len(self.tokenizer.encode(node_texts))}, Summarized Text Length: {len(self.tokenizer.encode(summarized_text))}"

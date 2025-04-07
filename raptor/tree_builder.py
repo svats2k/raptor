@@ -11,12 +11,19 @@ import tiktoken
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from .EmbeddingModels import BaseEmbeddingModel, OpenAIEmbeddingModel
-from .SummarizationModels import (BaseSummarizationModel,
-                                  GPT3TurboSummarizationModel)
+from .SummarizationModels import BaseSummarizationModel, GPT3TurboSummarizationModel
 from .tree_structures import Node, Tree
-from .utils import (distances_from_embeddings, get_children, get_embeddings,
-                    get_node_list, get_text,
-                    indices_of_nearest_neighbors_from_distances, split_text)
+from .utils import (
+    distances_from_embeddings,
+    get_children,
+    get_embeddings,
+    get_node_list,
+    get_text,
+    indices_of_nearest_neighbors_from_distances,
+    split_text,
+)
+
+from raptor.logger import logger
 
 logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO)
 
@@ -257,7 +264,9 @@ class TreeBuilder:
 
         return leaf_nodes
 
-    def build_from_text(self, text: str, use_multithreading: bool = True) -> Tree:
+    def build_from_text(
+        self, text: str, use_multithreading: bool = True, fname: Optional[str] = None
+    ) -> Tree:
         """Builds a golden tree from the input text, optionally using multithreading.
 
         Args:
@@ -268,6 +277,7 @@ class TreeBuilder:
         Returns:
             Tree: The golden tree structure.
         """
+        logger.info(f"Working on {fname}")
         chunks = split_text(text, self.tokenizer, self.max_tokens)
 
         logging.info("Creating Leaf Nodes")
@@ -290,7 +300,9 @@ class TreeBuilder:
 
         root_nodes = self.construct_tree(all_nodes, all_nodes, layer_to_nodes)
 
-        tree = Tree(all_nodes, root_nodes, leaf_nodes, self.num_layers, layer_to_nodes)
+        tree = Tree(
+            all_nodes, root_nodes, leaf_nodes, self.num_layers, layer_to_nodes, fname
+        )
 
         return tree
 
